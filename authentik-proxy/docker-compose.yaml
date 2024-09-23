@@ -1,0 +1,21 @@
+services:
+  authentik_proxy:
+    image: ghcr.io/goauthentik/proxy
+    container_name: ${SUB_DOMAIN}
+#        ports:
+#            - 9000:9000
+#            - 9443:9443
+    environment:
+        AUTHENTIK_HOST: https://${SSO_DOMAIN}
+        AUTHENTIK_INSECURE: "true"
+        AUTHENTIK_TOKEN: ${SSO_TOKEN}
+        # Starting with 2021.9, you can optionally set this too
+        # when authentik_host for internal communication doesn't match the public URL
+        AUTHENTIK_HOST_BROWSER: https://${SSO_DOMAIN}
+    networks:
+        proxy:
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true
