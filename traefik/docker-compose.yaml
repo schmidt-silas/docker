@@ -22,7 +22,23 @@ services:
       - ./configs:/configs/:ro
       - ./acme.json:/acme.json
       - ./logs:/var/log/traefik
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${SUB_DOMAIN}.entrypoints=http"
+      - "traefik.http.routers.${SUB_DOMAIN}.rule=Host(`${SUB_DOMAIN}.${DOMAIN}`)"
+      - "traefik.http.middlewares.${SUB_DOMAIN}-auth.basicauth.users=${YOUR_USERNAME_PASSWORD}"
+      - "traefik.http.middlewares.${SUB_DOMAIN}-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.${SUB_DOMAIN}.middlewares=${SUB_DOMAIN}-https-redirect"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.entrypoints=https"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.rule=Host(`${SUB_DOMAIN}.${DOMAIN}`)"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.middlewares=${SUB_DOMAIN}-auth"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.tls=true"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.tls.domains[0].main=${DOMAIN}"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.tls.domains[0].sans=*.${DOMAIN}"
+      - "traefik.http.routers.${SUB_DOMAIN}-secure.service=api@internal"
+      
 networks:
   proxy:
     external: true
