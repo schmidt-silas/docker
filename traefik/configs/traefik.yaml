@@ -1,0 +1,27 @@
+http:
+  routers:
+    traefik:
+      entryPoints:
+        - "web-secure"
+      rule: "Host(`traefik.h1.sslab.dev`)" # FQDN eingeben
+      middlewares:
+        - default-security-headers
+        - https-redirectscheme
+#        - authentik
+      tls:
+        certResolver: cloudflare
+        domains:
+          - main: sslab.dev
+            sans:
+              - "*.sslab.dev"
+          - main: h1.sslab.dev
+            sans:
+              - "*.h1.sslab.dev"
+      service: traefik
+
+  services:
+    traefik:
+      loadBalancer:
+        servers:
+          - url: "http://traefik:8080"
+        passHostHeader: true
